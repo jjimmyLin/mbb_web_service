@@ -1,18 +1,28 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-
+import { ref, onMounted } from 'vue'
 import { userManager } from '@/auth/cognito.js'
+
+const isAuthenticated = ref(false)
 
 function signIn() {
   userManager.signinRedirect()
 }
+
+function signOut() {
+  userManager.signoutRedirect()
+}
+
+onMounted(async () => {
+  const user = await userManager.getUser()
+  isAuthenticated.value = !!(user && !user.expired)
+})
 </script>
 
 <template>
   <div class="login-page">
     <h1>Welcome to MBB App</h1>
-    <button @click="signIn">Sign In with Cognito</button>
+    <button v-if="isAuthenticated" @click="signOut">Logout</button>
+    <button v-else @click="signIn">Login with Cognito</button>
   </div>
 </template>
 
